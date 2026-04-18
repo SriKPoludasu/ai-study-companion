@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 48 33% 98%;
+    --foreground: 218 24% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 218 24% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 24% 15%;
+    --primary: 172 70% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 38% 94%;
+    --secondary-foreground: 218 24% 20%;
+    --muted: 214 30% 94%;
+    --muted-foreground: 218 10% 46%;
+    --accent: 39 90% 68%;
+    --accent-foreground: 218 24% 15%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 22% 88%;
+    --input: 214 22% 88%;
+    --ring: 172 70% 34%;
+  }
+
+  .dark {
+    --background: 220 18% 10%;
+    --foreground: 210 28% 94%;
+    --card: 218 18% 14%;
+    --card-foreground: 210 28% 94%;
+    --popover: 218 18% 14%;
+    --popover-foreground: 210 28% 94%;
+    --primary: 170 62% 45%;
+    --primary-foreground: 220 18% 8%;
+    --secondary: 218 14% 20%;
+    --secondary-foreground: 210 28% 94%;
+    --muted: 218 14% 20%;
+    --muted-foreground: 215 14% 70%;
+    --accent: 39 88% 64%;
+    --accent-foreground: 220 18% 10%;
+    --destructive: 0 62% 42%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 218 14% 23%;
+    --input: 218 14% 23%;
+    --ring: 170 62% 45%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    letter-spacing: 0;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply border border-white/40 bg-white/70 shadow-glow backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06];
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}

@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  streak        Int             @default(6)
+  accounts      Account[]
+  sessions      Session[]
+  subjects      Subject[]
+  notes         Note[]
+  flashcards    Flashcard[]
+  quizzes       Quiz[]
+  attempts      QuizAttempt[]
+  studySessions StudySession[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Subject {
+  id          String         @id @default(cuid())
+  name        String
+  color       String
+  description String?
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folders     Folder[]
+  notes       Note[]
+  flashcards  Flashcard[]
+  quizzes     Quiz[]
+  studySessions StudySession[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  notes     Note[]
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id          String       @id @default(cuid())
+  title       String
+  content     String
+  sourceType  SourceType   @default(MANUAL)
+  fileUrl     String?
+  summary     String?
+  keyConcepts Json?
+  embedding   Json?
+  userId      String
+  subjectId   String?
+  folderId    String?
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     Subject?     @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  folder      Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  flashcards  Flashcard[]
+  quizzes     Quiz[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Flashcard {
+  id        String   @id @default(cuid())
+  front     String
+  back      String
+  difficulty Difficulty @default(MEDIUM)
+  mastered  Boolean  @default(false)
+  userId    String
+  subjectId String?
+  noteId    String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  note      Note?    @relation(fields: [noteId], references: [id], onDelete: SetNull)
+  reviews   FlashcardReview[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FlashcardReview {
+  id          String    @id @default(cuid())
+  flashcardId String
+  rating      Int
+  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}
+
+model Quiz {
+  id        String      @id @default(cuid())
+  title     String
+  userId    String
+  subjectId String?
+  noteId    String?
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject   Subject?    @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  note      Note?       @relation(fields: [noteId], references: [id], onDelete: SetNull)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+  createdAt DateTime    @default(now())
+}
+
+model QuizQuestion {
+  id          String       @id @default(cuid())
+  quizId      String
+  type        QuestionType
+  prompt      String
+  options     Json?
+  answer      String
+  explanation String?
+  skill       String?
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  quizId    String
+  score     Int
+  total     Int
+  weakAreas Json?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model StudySession {
+  id        String   @id @default(cuid())
+  title     String
+  startsAt  DateTime
+  duration  Int
+  completed Boolean  @default(false)
+  userId    String
+  subjectId String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+}
+
+enum SourceType {
+  MANUAL
+  PDF
+  TEXT_FILE
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  SHORT_ANSWER
+}
